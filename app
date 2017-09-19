@@ -4,6 +4,7 @@ import sqlalchemy
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String
+from sqlalchemy.orm import sessionmaker
 
 app = Flask(__name__)
 
@@ -40,6 +41,10 @@ Base.metadata.create_all(engine) #创建表结构 （这里是父类调子类）
 @app.route('/backend/login',methods=['GET','POST'])
 def login():
     u = User.from_json(request.json)
+    session = sessionmaker(bind=engine)
+    session1 = session()
+    session1.add(u)
+    session1.commit()
     return jsonify(u.to_json())
 
 
