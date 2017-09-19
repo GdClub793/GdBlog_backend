@@ -1,18 +1,21 @@
 from flask import Flask
 from flask import request,jsonify
-import sqlalchemy
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import sessionmaker
+from flask.ext.login import login_user
 
 app = Flask(__name__)
 
 # 创建实例，并连接test库
-engine = create_engine("mysql+pymysql://root:Zhaoyun0218@localhost/gd_blog",
+engine = create_engine("mysql+pymysql://root:275265zt@localhost/gd_blog",
                                     encoding='utf-8', echo=True)
 # echo=True 显示信息
 Base = declarative_base()  # 生成orm基类
+
+session = sessionmaker(bind=engine)
+session1 = session()
 
 class User(Base):
     __tablename__ = 'user'  # 表名
@@ -36,19 +39,28 @@ class User(Base):
         password = user.get('password')
         name = user.get('name')
         return User(id = id,password=password,name=name)
+
+
+
 Base.metadata.create_all(engine) #创建表结构 （这里是父类调子类）
 
-@app.route('/backend/login',methods=['GET','POST'])
-def login():
+
+
+@app.route('/backend/register',methods=['GET','POST'])
+#增
+def user_add():
     u = User.from_json(request.json)
-    session = sessionmaker(bind=engine)
-    session1 = session()
     session1.add(u)
     session1.commit()
     return jsonify(u.to_json())
+#查
+@app.route('/home/login',methods=['GET','POST'])
+def login():
+    u = User.from_json(request.json)
+    c = session1.query(User).filter_by(name = u.name).first()
 
+    return jsonify(c.to_json())
 
 
 if __name__ == '__main__':
     app.run()
-
