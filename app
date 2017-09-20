@@ -4,12 +4,11 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import sessionmaker
-from flask.ext.login import login_user
 
 app = Flask(__name__)
 
 # 创建实例，并连接test库
-engine = create_engine("mysql+pymysql://root:275265zt@localhost/gd_blog",
+engine = create_engine("mysql+pymysql://root:Zhaoyun0218@localhost/gd_blog",
                                     encoding='utf-8', echo=True)
 # echo=True 显示信息
 Base = declarative_base()  # 生成orm基类
@@ -44,7 +43,9 @@ class User(Base):
 
 Base.metadata.create_all(engine) #创建表结构 （这里是父类调子类）
 
-
+@app.route('/',methods=['GET','POST'])
+def haha():
+    return "haha"
 
 @app.route('/backend/register',methods=['GET','POST'])
 #增
@@ -61,6 +62,22 @@ def login():
 
     return jsonify(c.to_json())
 
+#改
+@app.route('/index/changename',methods=['GET','POST'])
+def change():
+    u = User.from_json(request.json)
+    c = session1.query(User).filter_by(id = u.id).first()
+    print(c.name,c.id,c.password)
+    c.name = u.name
+    session1.commit()
+    return jsonify(c.to_json())
+#删
+@app.route('/index/delete',methods=['GET','POST'])
+def delete():
+    u = User.from_json(request.json)
+    c = session1.query(User).filter_by(id = u.id).delete()
+    session1.commit()
+    return "done"
 
 if __name__ == '__main__':
     app.run()
